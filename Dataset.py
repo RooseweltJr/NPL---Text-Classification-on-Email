@@ -42,29 +42,30 @@ def filter_text(text, stop_words):
     filtered_text = [wordnet_lemmatizer.lemmatize(w, pos="v") for w in filtered_text if not w in stop_words] 
     return " ".join(filtered_text)
 
-def plot_wordcloud_and_top10(all_text, title):
+def plot_wordcloud_and_top10(all_text: str, title: str) -> None:
     # Criação da DataFrame para as palavras e cálculo das 10 palavras mais frequentes
     count = pd.DataFrame(all_text.split(), columns=['words'])
     top_10 = count['words'].value_counts().nlargest(10).reset_index()
     top_10.columns = ['words', 'count']
 
-    # Configuração da figura com 2 subplots
-    plt.figure(figsize=(20, 20))
+    # Configuração da figura com 2 subplots lado a lado
+    plt.figure(figsize=(20, 10))
+    plt.suptitle(title, fontsize=22, y=1.02)
 
     # Plot do gráfico de barras das 10 palavras mais frequentes
-    plt.subplot(2, 1, 1)
+    plt.subplot(1, 2, 2)
     sns.barplot(x=top_10['words'], y=top_10['count'], palette=sns.color_palette("mako"))
-    plt.title('Top 10 Palavras Mais Frequentes', fontsize=24)
-    plt.xlabel('Palavras', fontsize=18)
-    plt.ylabel('Contagem', fontsize=18)
+    plt.title('Ranking 10 Palavras ', fontsize=16)
+    plt.ylabel('Qtd', fontsize=14)
     plt.xticks(rotation=45)
 
     # Criação e plot da nuvem de palavras
-    plt.subplot(2, 1, 2)
-    cloud = WordCloud(width=1920, height=1080, max_font_size=200, max_words=300, background_color="white").generate(words)
+    plt.subplot(1, 2, 1)
+    cloud = WordCloud(width=800, height=800, max_font_size=200, max_words=300, background_color="white").generate(all_text)
     plt.imshow(cloud, interpolation="gaussian")
     plt.axis("off")
-    plt.title(title, fontsize=24)
+    plt.title('Nuvem de palavras ', fontsize=16)
+   
 
     plt.tight_layout()
     plt.show()
