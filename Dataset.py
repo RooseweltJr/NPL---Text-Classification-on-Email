@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+import streamlit as st
 #---------------------------------------Processamento de texto------------------------------------------------------------#
 import regex
 import nltk
@@ -30,10 +31,16 @@ def tratar_conteudo_stop_words(data:pd.DataFrame):
     for punct in punctuation:
         stop.append(punct)
     
-    data["filtered_text"] = data.Conteudo.apply(lambda x : filter_text(x, stop)) 
-    return data
+    data["Conteudo_filtrado"] = data.Conteudo.apply(lambda x : filter_text(x, stop)) 
+    return data[['Conteudo_filtrado', 'Categoria','Id','Conteudo']]
 
+def plotar_barras(data:pd.DataFrame):
+    # Gera o gráfico de barras
+        fig, ax = plt.subplots()
+        data['Categoria'].value_counts().plot.bar(ax=ax)
 
+        # Exibe o gráfico no Streamlit
+        st.pyplot(fig)
 def filter_text(text, stop_words):
     word_tokens = WordPunctTokenizer().tokenize(text.lower())
     wordnet_lemmatizer = WordNetLemmatizer()
@@ -66,9 +73,10 @@ def plot_wordcloud_and_top10(all_text: str, title: str) -> None:
     plt.axis("off")
     plt.title('Nuvem de palavras ', fontsize=16)
    
-
     plt.tight_layout()
-    plt.show()
+
+    # Exibir o gráfico no Streamlit
+    st.pyplot(plt)
 
 def retirar_duplicatas(df:pd.DataFrame):
     
@@ -85,45 +93,52 @@ def retirar_duplicatas(df:pd.DataFrame):
 
 
     data = pd.DataFrame(uni).T
-    print(data.shape)
     data.columns = ['Conteudo', 'Categoria','Id']
     return data
 
-####### Importando dados #######
-names = []
 
-caminho_atual = os.getcwd()
+def importar_dados():
+    names = []
 
-base = os.path.join(caminho_atual, 'Data')
+    caminho_atual = os.getcwd()
 
-folders = os.listdir(base)
-data = []
+    base = os.path.join(caminho_atual, 'Data')
 
-# Ler os arquivos e juntar em um arquivo só
-for folder in folders:
-    files = os.listdir(os.path.join(base, folder))
-    for file in files:
-        try:
-            if file == 'combine.csv':
+    folders = os.listdir(base)
+    data = []
+
+    # Ler os arquivos e juntar em um arquivo só
+    for folder in folders:
+        files = os.listdir(os.path.join(base, folder))
+        for file in files:
+            try:
+                if file == 'combine.csv':
+                    pass
+                with open(os.path.join(base, folder, file), encoding='utf-8') as f:
+                    contents = " ".join(f.readlines())
+                    data.append([file.split(".")[0], folder, contents])
+            except Exception as e:
                 pass
-            with open(os.path.join(base, folder, file), encoding='utf-8') as f:
-                contents = " ".join(f.readlines())
-                data.append([file.split(".")[0], folder, contents])
-        except Exception as e:
-            pass
 
-df = pd.DataFrame(data, columns=['ID', 'Categoria', 'Conteudo'])
-df.to_csv('combine.csv',index=False)
-df['Categoria'].value_counts().plot.bar()
+    df = pd.DataFrame(data, columns=['ID', 'Categoria', 'Conteudo'])
+    
+    return df
+
+def data_set():
+    ####### Importando dados #######
+    
+    df=importar_dados()
+
+    
 
 
-# Retirar emails duplicados:
-data = retirar_duplicatas(df)
+    # Retirar emails duplicados:
+    data = retirar_duplicatas(df)
 
-# tratar o conteudo e stopwords
-data = tratar_conteudo_stop_words(data)
+    # tratar o conteudo e stopwords
+    data = tratar_conteudo_stop_words(data)
 
-#Visualizando resultados
-all_text = " ".join(data[data.Categoria == "Crime"].filtered_text) 
+    #Visualizando resultados
+    all_text = " ".join(data[data.Categoria == "Crime"].filtered_text) 
 
-plot_wordcloud_and_top10(all_text, 'Crime')
+    plot_wordcloud_and_top10(all_text, 'Crime')
