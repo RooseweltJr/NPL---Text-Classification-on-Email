@@ -42,6 +42,8 @@ def main():
             data = Dataset.tratar_conteudo_stop_words(data)
             st.dataframe(data.head(10))
 
+            data.to_csv('Base_tratada\\database.csv',index=False)
+            
             st.subheader("Visualização")
             st.markdown(f"Com tratamento finalizado, podemos utilizar algumas ferramentas para visualizar melhor o contéudo dos emails de cada cateoria. ")
 
@@ -51,11 +53,10 @@ def main():
 
             Dataset.plot_wordcloud_and_top10(all_text, cat)
                     
-        # case "Modelo":
-        #     st.header("Modelo")
-        #     st.write("Nessa aba vamos construir nosso modelo, treina-lo e, por fim, utiliza-lo para fazer predições com ele")
-        #     modelo.modelo(data)
-   
+        case "Modelo baseline":
+            st.subheader("Modelo")
+            st.write("Nessa aba vamos construir nosso modelo, treina-lo e, por fim, utiliza-lo para fazer predições com ele")
+           
 
     
 if __name__=='__main__':

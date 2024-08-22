@@ -124,21 +124,26 @@ def importar_dados():
     
     return df
 
-def data_set():
+def data_set(visualizar:bool=False):
     ####### Importando dados #######
     
     df=importar_dados()
 
     
-
-
     # Retirar emails duplicados:
     data = retirar_duplicatas(df)
 
     # tratar o conteudo e stopwords
     data = tratar_conteudo_stop_words(data)
 
-    #Visualizando resultados
-    all_text = " ".join(data[data.Categoria == "Crime"].filtered_text) 
+    if visualizar== True:
 
-    plot_wordcloud_and_top10(all_text, 'Crime')
+        #Visualizando resultados
+        all_text = " ".join(data[data.Categoria == "Crime"].filtered_text)
+        plot_wordcloud_and_top10(all_text, 'Crime')
+
+    return data
+
+if __name__=='__main__':
+   df = data_set()
+   df.to_csv('Base_tratada\\database.csv',index=False)
