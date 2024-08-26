@@ -1,5 +1,6 @@
 import streamlit as st
 import Dataset
+import modelos_baseline
 import matplotlib.pyplot as plt
 
 def main():
@@ -54,10 +55,56 @@ def main():
             Dataset.plot_wordcloud_and_top10(all_text, cat)
                     
         case "Modelo baseline":
-            st.subheader("Modelo")
-            st.write("Nessa aba vamos construir nosso modelo, treina-lo e, por fim, utiliza-lo para fazer predições com ele")
-           
+            st.subheader("Modelos baseline")
+            st.write(""" Com os dados tratados, vamos treinar alguns modelos para 
+                     testar seu desempenho com processamento de linguagem natural. Mas antes, vamos importar nossa base, bem como
+                     codifica-la e ajusta-la  para o nosso treinamento""")
+            
+            data = modelos_baseline.importar_base_tratadas()
 
-    
+            df,vetor_treinamento, = modelos_baseline.codificar_categoria(data)
+
+            st.dataframe(df.head(10))
+
+            st.write(""" Para nosso projeto, vamos utilizar 4 *Classifiers* de aprendizado diferente:  """)
+            
+            
+            st.markdown("""
+                        - Máquina de vetores de suporte (SVC)
+                        - Regressão logística (LR)
+                        - K-ésimo Vizinho mais Próximo (KNN)
+                        - Árvore de Decisão (DT)""")
+            
+            st.markdown("### Treinamento")
+            
+            test_size = (int(st.slider('Percentual de "Test Size" (%):', min_value=10, max_value=90, step=5)))/100
+            n_split = (int(st.slider('Quantidade de "Folds para Validação Cruzada" ', min_value=2, max_value=5, step=1)))
+            
+            # Botão para iniciar o processamento
+            if st.button("Iniciar"):
+                X_train, X_test, y_train, y_test = modelos_baseline.dividir_teste_treino(vetor_treinamento,df,test_size)
+
+                st.markdown(""" Para analisar nossos modelos, vamos utilizar uma validação cruzada para analisar a acurácia do modelo,
+                            bem como AUC (Área Sob a Curva). O primeiro permite analisar o percentual de acerto, enquanto o segundo podemos visualizar
+                            a relação da taxa de verdadeiros positivos (TPR ou sensibilidade) e a taxa de falsos positivos (FPR) em diferentes limiares de classificação""")
+                
+                st.markdown("#### Acurácia:")
+                st.markdown("Isso pode levar alguns minutos")
+
+                with st.spinner('Treinando modelo para calcular a acurácia...'):
+                    modelos_baseline.treinamento_acuracia(X_train, y_train, n_split)
+
+                st.markdown("#### AUC:")
+                st.markdown("Isso pode levar alguns minutos")
+                with st.spinner('Treinando modelo para calcular a AUC...'):
+                    modelos_baseline.treinamento_AUC(X_train, y_train, n_split)
+
+                st.markdown("### Teste")
+                st.markdown("Isso pode levar alguns minutos")
+                with st.spinner('Testando o modelo...'):
+                    modelos_baseline.teste(X_test, y_test, n_split)
+
+            
+
 if __name__=='__main__':
     main()
