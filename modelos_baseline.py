@@ -10,12 +10,13 @@ import pandas as pd
 from plotly.subplots import make_subplots
 from sklearn.model_selection import cross_val_predict
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+import streamlit as st
 
 
-
-df=pd.read_csv('Base_tratada\\database.csv')
-df.dropna(subset=['Conteudo_filtrado'],inplace=True)
+def importar_base_tratadas():
+    df=pd.read_csv('Base_tratada\\database.csv')
+    df.dropna(subset=['Conteudo_filtrado'],inplace=True)
+    return df
 
 
 classifiers = {
@@ -49,7 +50,9 @@ def matriz_confusao(y_test,log_reg_pred,knn_pred,svc_pred,tree_pred):
     # Atualiza os eixos e mostra o gráfico
     conf_matrix.update_yaxes(autorange="reversed")
     conf_matrix.update_layout(title_text='Confusion Matrices for Classifiers')
-    conf_matrix.show()
+    
+    # Exibe o gráfico no Streamlit
+    st.plotly_chart(conf_matrix)
 
 def codificar_categoria(df:pd.DataFrame)->pd.DataFrame:
     
@@ -94,7 +97,7 @@ def treinamento_acuracia( X_train, y_train,n_split:int = 5):
     for key, classifier in classifiers.items():
         classifier.fit(X_train, y_train)
         training_score = cross_val_score(classifier, X_train, y_train, cv=n_split)
-        print("Classifiers: ", key, "Has a training score of", round(training_score.mean(), 2) * 100, "% accuracy score.")
+        st.markdown(f' - Classifier {key} - pontuação de treinamento: {round(training_score.mean(), 3) * 100}% accuracy')
 
 def treinamento_AUC(X_train, y_train,n_split:int = 5):
     
@@ -111,10 +114,10 @@ def treinamento_AUC(X_train, y_train,n_split:int = 5):
     svc_auc_score = roc_auc_score(y_train, svc_pred, multi_class = 'ovr')
     tree_auc_score = roc_auc_score(y_train, tree_pred, multi_class = 'ovr')
 
-    print('Support Vector Classifier AUC: ', svc_auc_score)
-    print('Logistic Regression AUC: ', log_reg_auc_score)
-    print('KNears Neighbors AUC: ', knn_auc_score)
-    print('Decision Tree Classifier AUC: ', tree_auc_score)
+    st.markdown(f'- SVC AUC: {round(svc_auc_score,3) *100} %')
+    st.markdown(f'- LR AUC: {round(log_reg_auc_score,3) *100} %')
+    st.markdown(f'- KNN AUC: { round(knn_auc_score,3) *100}%')
+    st.markdown(f'- DT AUC: {round(tree_auc_score,3) *100}%')
 
 def teste(X_test, y_test,n_split:int = 5):
     method = 'predict'
