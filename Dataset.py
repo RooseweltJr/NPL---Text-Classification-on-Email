@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 import streamlit as st
+
 #---------------------------------------Processamento de texto------------------------------------------------------------#
 import regex
 import nltk
@@ -17,8 +18,8 @@ nltk.download('punkt', download_dir=r'C:\Users\roose\AppData\Roaming\nltk_data')
 nltk.download('stopwords', download_dir=r'C:\Users\roose\AppData\Roaming\nltk_data')
 
 from wordcloud import WordCloud
-from nltk.corpus import stopwords, words
-from nltk.tokenize import WordPunctTokenizer, word_tokenize
+from nltk.corpus import stopwords
+from nltk.tokenize import WordPunctTokenizer
 from string import punctuation
 from nltk.stem import WordNetLemmatizer
 
@@ -132,6 +133,7 @@ def data_set(visualizar:bool=False):
     
     # Retirar emails duplicados:
     data = retirar_duplicatas(df)
+    print(data['Categoria'].unique())
 
     # tratar o conteudo e stopwords
     data = tratar_conteudo_stop_words(data)
